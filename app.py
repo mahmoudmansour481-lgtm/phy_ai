@@ -12,7 +12,7 @@ except:
     st.error("تأكد من وضع GOOGLE_API_KEY في إعدادات Secrets على Streamlit Cloud")
 
 # استخدام الموديل المستقر
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-3-flash-preview')
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
