@@ -13,7 +13,7 @@ except:
 
 # استخدام الموديل المستقر
 model = genai.GenerativeModel(
-    model_name='gemini-3-flash-preview',
+    model_name='gemini-pro-latest',
        system_instruction="أنت 'مستر محمود'، خبير في مادة الفيزياء للمرحلة الثانوية بمصر. أسلوبك تعليمي، مشجع، ومبسط. استخدم اللهجة المصرية البيضاء المحببة للطلاب، وقدم حلولاً نموذجية للمسائل مع شرح الخطوات بوضوح."
 )
 if "messages" not in st.session_state:
