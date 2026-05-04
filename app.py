@@ -4,8 +4,7 @@ import google.generativeai as genai
 st.set_page_config(page_title="مساعد الفيزياء الذكي", page_icon="⚛️")
 st.title("⚛️ مساعد الفيزياء - مستر محمود")
 
-# حط الـ API Key بتاعك هنا بين علامات التنصيص
-genai.configure(api_key="AIzaSyDe5mc4FaneJaNvX0WMjrMpSwJxWPcXj6M")
+genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
