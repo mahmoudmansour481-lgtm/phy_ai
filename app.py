@@ -7,7 +7,7 @@ st.title("⚛️ مساعد الفيزياء - مستر محمود")
 # حط الـ API Key بتاعك هنا بين علامات التنصيص
 genai.configure(api_key="AIzaSyDe5mc4FaneJaNvX0WMjrMpSwJxWPcXj6M")
 
-model = genai.GenerativeModel('gemini-3-flash')
+model = genai.GenerativeModel('gemini-3-flash-latest')
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
