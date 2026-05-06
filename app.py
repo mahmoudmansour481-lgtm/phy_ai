@@ -1,21 +1,41 @@
 import streamlit as st
 import google.generativeai as genai
+import telebot
+from threading import Thread
 
+# 1. إعدادات جيمي والتليجرام
 st.set_page_config(page_title="مساعد الفيزياء الذكي", page_icon="⚛️")
 st.title("⚛️ مساعد الفيزياء - مستر محمود")
 
-# جلب المفتاح من الـ Secrets
+# جلب المفاتيح من الـ Secrets
 try:
-    api_key = st.secrets["GOOGLE_API_KEY"]
-    genai.configure(api_key=api_key)
-except:
-    st.error("تأكد من وضع GOOGLE_API_KEY في إعدادات Secrets على Streamlit Cloud")
+    API_KEY = st.secrets["GOOGLE_API_KEY"]
+    TELEGRAM_TOKEN = "8755768203:AAG0lBy3IkNb67JDNR-18F7ZEXTfGlsUo-A"
+    genai.configure(api_key=API_KEY)
+    model = genai.GenerativeModel('gemini-1.5-flash')
+    bot = telebot.TeleBot(TELEGRAM_TOKEN)
+except Exception as e:
+    st.error("تأكد من ضبط المفاتيح في الـ Secrets")
 
-# استخدام الموديل المستقر
-model = genai.GenerativeModel(
-    model_name='gemini-3-flash-preview',
-       system_instruction="أنت 'مستر محمود'، خبير في مادة الفيزياء للمرحلة الثانوية بمصر. أسلوبك تعليمي، مشجع، ومبسط. استخدم اللهجة المصرية البيضاء المحببة للطلاب، وقدم حلولاً نموذجية للمسائل مع شرح الخطوات بوضوح."
-)
+# 2. وظيفة ردود التليجرام (بتشتغل في الخلفية)
+def run_bot():
+    @bot.message_handler(func=lambda message: True)
+    def handle_telegram_message(message):
+        try:
+            response = model.generate_content(message.text)
+            bot.reply_to(message, response.text)
+        except:
+            bot.reply_to(message, "لحظة يا بطل، جيمي مشغول شوية.")
+    
+    bot.infinity_polling(non_stop=True)
+
+# 3. تشغيل البوت في "خيط" منفصل عشان ميعطلش الموقع
+if "bot_thread" not in st.session_state:
+    thread = Thread(target=run_bot)
+    thread.start()
+    st.session_state.bot_thread = True
+
+# 4. واجهة الموقع العادية (للي بيحب يستخدم المتصفح)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -27,12 +47,8 @@ if prompt := st.chat_input("اسألني أي سؤال في الفيزياء..."
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
-
-    try:
-        with st.chat_message("assistant"):
-            # تحديد الموديل هنا مباشرة يحل مشاكل الـ NotFound
-            response = model.generate_content(prompt)
-            st.markdown(response.text)
-            st.session_state.messages.append({"role": "assistant", "content": response.text})
-    except Exception as e:
-        st.error(f"عذراً، حدث خطأ: {e}")
+    
+    with st.chat_message("assistant"):
+        response = model.generate_content(prompt)
+        st.markdown(response.text)
+        st.session_state.messages.append({"role": "assistant", "content": response.text})
