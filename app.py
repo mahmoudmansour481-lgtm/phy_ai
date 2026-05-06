@@ -18,16 +18,28 @@ except Exception as e:
     st.error("تأكد من ضبط المفاتيح في الـ Secrets")
 
 # 2. وظيفة ردود التليجرام (بتشتغل في الخلفية)
+# وظيفة تشغيل البوت مع إعادة المحاولة التلقائية
 def run_bot():
-    @bot.message_handler(func=lambda message: True)
-    def handle_telegram_message(message):
-        try:
-            response = model.generate_content(message.text)
-            bot.reply_to(message, response.text)
-        except:
-            bot.reply_to(message, "لحظة يا بطل، جيمي مشغول شوية.")
-    
-    bot.infinity_polling(non_stop=True)
+    try:
+        @bot.message_handler(func=lambda message: True)
+        def handle_telegram_message(message):
+            try:
+                # بنستخدم الموديل اللي عرفناه فوق
+                response = model.generate_content(message.text)
+                bot.reply_to(message, response.text)
+            except Exception as e:
+                bot.reply_to(message, "فيه ضغط حالياً يا بطل، جرب كمان ثواني.")
+        
+        bot.remove_webhook() # خطوة أمان عشان ميتداخلش مع محاولات قديمة
+        bot.infinity_polling(timeout=10, long_polling_timeout=5)
+    except Exception as e:
+        print(f"Bot error: {e}")
+
+# التأكد من تشغيل البوت مرة واحدة فقط
+if "bot_started" not in st.session_state:
+    thread = Thread(target=run_bot, daemon=True) # daemon=True عشان يتقفل مع الموقع
+    thread.start()
+    st.session_state.bot_started = True
 
 # 3. تشغيل البوت في "خيط" منفصل عشان ميعطلش الموقع
 if "bot_thread" not in st.session_state:
