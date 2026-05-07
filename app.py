@@ -14,7 +14,7 @@ if "GOOGLE_API_KEY" not in st.secrets:
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 # تعريف الموديل بأبسط صورة ممكنة
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-1.5-flash-001')
 
 # نظام الشات
 if "messages" not in st.session_state:
