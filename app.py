@@ -16,7 +16,7 @@ API_KEY = st.secrets["GOOGLE_API_KEY"]
 TELEGRAM_TOKEN = "8755768203:AAG0lBy3IkNb67JDNR-18F7ZEXTfGlsUo-A"
 
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('models/gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-pro')
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 
 # 3. وظيفة التليجرام
