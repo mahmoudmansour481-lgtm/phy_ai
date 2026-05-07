@@ -13,9 +13,9 @@ genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
 # محاولة تشغيل الموديل بأكثر من اسم لضمان التوافق
 try:
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
 except:
-    model = genai.GenerativeModel('models/gemini-1.5-flash')
+    model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
 
 # شات بسيط للتجربة
 if prompt := st.chat_input("اسألني سؤال في الفيزياء..."):
