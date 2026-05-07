@@ -1,39 +1,42 @@
 import streamlit as st
 import google.generativeai as genai
-from google.generativeai.types import RequestOptions
 
-st.set_page_config(page_title="مساعد الفيزياء")
+# إعداد الصفحة
+st.set_page_config(page_title="مساعد الفيزياء - مستر محمود")
 st.title("⚛️ مساعد الفيزياء - مستر محمود")
 
-# جلب المفتاح
+# التأكد من وجود المفتاح في Secrets
 if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("المفتاح ناقص!")
+    st.error("المفتاح غير موجود في الإعدادات (Secrets)")
     st.stop()
 
-# الإعداد مع إجبار السيرفر على استخدام v1 المستقرة
+# إعداد الجيمناي
 genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
 
-# هنا السر: بنحدد لـ جوجل إننا عاوزين النسخة المستقرة v1 حصراً
-model = genai.GenerativeModel(
-    model_name='gemini-1.5-flash'
-)
+# تعريف الموديل بأبسط صورة ممكنة
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-if prompt := st.chat_input("اسأل مستر جيمي..."):
+# نظام الشات
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+if prompt := st.chat_input("اسألني أي سؤال في الفيزياء..."):
+    st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.markdown(prompt)
+
     with st.chat_message("assistant"):
         try:
-            # استخدام RequestOptions لتحديد الإصدار يدوياً
-            response = model.generate_content(
-                prompt,
-                request_options=RequestOptions(api_version='v1')
-            )
-            st.write(response.text)
+            # مناداة الموديل مباشرة بدون أي إضافات معقدة
+            response = model.generate_content(prompt)
+            st.markdown(response.text)
+            st.session_state.messages.append({"role": "assistant", "content": response.text})
         except Exception as e:
-            # لو فشل، بنجرب آخر محاولة بالاسم القديم المستقر
-            try:
-                legacy_model = genai.GenerativeModel('gemini-pro')
-                response = legacy_model.generate_content(prompt)
-                st.write(response.text)
-            except:
-                st.error(f"عذراً يا بطل، لسه فيه مشكلة في السيرفر: {e}")
+            if "429" in str(e):
+                st.error("خلصت حصة النهاردة يا بطل، نتقابل بكرة!")
+            else:
+                st.error(f"حدث خطأ: {e}")
