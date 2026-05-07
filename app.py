@@ -1,24 +1,25 @@
 import streamlit as st
 import google.generativeai as genai
 
-# إعداد الواجهة
+# إعداد الصفحة
+st.set_page_config(page_title="مساعد الفيزياء", layout="centered")
 st.title("⚛️ مساعد الفيزياء - مستر محمود")
 
-# التأكد من المفتاح
+# جلب المفتاح
 if "GOOGLE_API_KEY" not in st.secrets:
-    st.error("المفتاح ناقص في الـ Secrets!")
+    st.error("المفتاح غير موجود في Secrets!")
     st.stop()
 
-genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-
-# محاولة تشغيل الموديل بأكثر من اسم لضمان التوافق
+# تعريف الموديل بأبسط طريقة
 try:
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
-except:
-    model = genai.GenerativeModel('models/gemini-1.5-flash-latest')
+    genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
+    # استخدمنا الاسم ده لأنه الأكثر توافقاً حالياً
+    model = genai.GenerativeModel('gemini-1.5-flash')
+except Exception as e:
+    st.error(f"فشل في إعداد الجيمناي: {e}")
 
-# شات بسيط للتجربة
-if prompt := st.chat_input("اسألني سؤال في الفيزياء..."):
+# واجهة الشات
+if prompt := st.chat_input("اسأل مستر جيمي..."):
     with st.chat_message("user"):
         st.write(prompt)
     with st.chat_message("assistant"):
@@ -26,4 +27,4 @@ if prompt := st.chat_input("اسألني سؤال في الفيزياء..."):
             response = model.generate_content(prompt)
             st.write(response.text)
         except Exception as e:
-            st.error(f"عذراً، فيه مشكلة: {str(e)}")
+            st.error(f"خطأ: {e}")
